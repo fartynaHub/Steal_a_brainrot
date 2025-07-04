@@ -210,7 +210,6 @@ function loadMainGUI()
     local savedBasePosition = nil
     local savedHeight = nil
     local espHandles = {}
-    local random = Random.new()
     local flyConnection = nil
     local noclipConnection = nil
     local autoStealConnection = nil
@@ -451,9 +450,18 @@ function loadMainGUI()
         end)
     end
 
-    -- Float функция
+    -- Float функция с немедленным набором высоты
     local function floatToBase()
-        if floatActive or not savedBasePosition then return end
+        if floatActive or not savedBasePosition then 
+            if not savedBasePosition then
+                StarterGui:SetCore("SendNotification", {
+                    Title = "Ошибка",
+                    Text = "Базовая позиция не установлена",
+                    Duration = 3
+                })
+            end
+            return 
+        end
         floatActive = true
         
         local character = player.Character
@@ -476,8 +484,8 @@ function loadMainGUI()
         FloatBtn.Text = "Floating..."
         local startTime = tick()
         local speed = 40
-        local maxHeight = 5
         local minDistanceToStop = 3
+        local targetHeight = savedBasePosition.Y + 10 -- Набираем высоту сразу
         
         local connection
         connection = RunService.Heartbeat:Connect(function()
@@ -487,7 +495,9 @@ function loadMainGUI()
                 return
             end
             
-            local direction = (savedBasePosition - humanoidRootPart.Position)
+            local currentPos = humanoidRootPart.Position
+            local targetPos = Vector3.new(savedBasePosition.X, targetHeight, savedBasePosition.Z)
+            local direction = (targetPos - currentPos)
             local distance = direction.Magnitude
             direction = direction.Unit
             
@@ -507,19 +517,22 @@ function loadMainGUI()
                 return
             end
             
-            local currentHeight = math.min(maxHeight, distance / 10)
-            local moveDirection = Vector3.new(direction.X, 0, direction.Z).Unit
-            local verticalAdjust = Vector3.new(0, currentHeight, 0)
-            humanoidRootPart.Velocity = (moveDirection * speed) + verticalAdjust
-            
-            if random:NextNumber() < 0.15 then
-                humanoidRootPart.Velocity = humanoidRootPart.Velocity - moveDirection * 30
-            end
+            -- Плавное движение с немедленным набором высоты
+            humanoidRootPart.Velocity = direction * speed
         end)
     end
 
-    -- Auto Steal функция с увеличенной высотой
+    -- Auto Steal функция с проверкой сохраненной базы и go down
     local function toggleAutoSteal()
+        if not savedBasePosition then
+            StarterGui:SetCore("SendNotification", {
+                Title = "Ошибка",
+                Text = "Сначала сохраните позицию базы",
+                Duration = 3
+            })
+            return
+        end
+        
         autoStealActive = not autoStealActive
         AutoStealBtn.Text = "Auto Steal: " .. (autoStealActive and "ON" or "OFF")
         AutoStealBtn.BackgroundColor3 = autoStealActive and Color3.fromRGB(50, 120, 50) or Color3.fromRGB(70, 70, 70)
@@ -539,43 +552,44 @@ function loadMainGUI()
             -- Сохраняем текущую высоту
             savedHeight = humanoidRootPart.Position.Y
             
-            -- Телепортируем вверх на 200 шагов (увеличенная высота)
+            -- Телепортируем вверх на 200 шагов
             local targetPosition = humanoidRootPart.Position + Vector3.new(0, 200, 0)
             humanoidRootPart.CFrame = CFrame.new(targetPosition)
             
             -- Ждем 2 секунды
             task.wait(2)
             
-            -- Активируем Float к базе (если база сохранена)
-            if savedBasePosition then
-                -- Модифицируем позицию базы, чтобы она была в небе
-                local skyBase = Vector3.new(savedBasePosition.X, humanoidRootPart.Position.Y, savedBasePosition.Z)
-                
-                -- Временно сохраняем оригинальную базу
-                local originalBase = savedBasePosition
-                savedBasePosition = skyBase
-                
-                -- Активируем Float
-                floatToBase()
-                
-                -- Ждем пока Float завершится
-                while floatActive do
-                    task.wait()
-                end
-                
-                -- Восстанавливаем оригинальную базу
-                savedBasePosition = originalBase
-                
-                -- Телепортируем вниз к сохраненной высоте
-                local finalPosition = Vector3.new(humanoidRootPart.Position.X, savedHeight, humanoidRootPart.Position.Z)
-                humanoidRootPart.CFrame = CFrame.new(finalPosition)
-            else
-                StarterGui:SetCore("SendNotification", {
-                    Title = "Ошибка",
-                    Text = "Базовая позиция не установлена",
-                    Duration = 3
-                })
+            -- Модифицируем позицию базы, чтобы она была в небе
+            local skyBase = Vector3.new(savedBasePosition.X, humanoidRootPart.Position.Y, savedBasePosition.Z)
+            
+            -- Временно сохраняем оригинальную базу
+            local originalBase = savedBasePosition
+            savedBasePosition = skyBase
+            
+            -- Активируем Float
+            floatToBase()
+            
+            -- Ждем пока Float завершится
+            while floatActive do
+                task.wait()
             end
+            
+            -- Проверяем, достигли ли мы позиции над базой
+            local currentPos = humanoidRootPart.Position
+            local baseXZ = Vector3.new(originalBase.X, 0, originalBase.Z)
+            local currentXZ = Vector3.new(currentPos.X, 0, currentPos.Z)
+            
+            if (baseXZ - currentXZ).Magnitude < 5 then
+                -- Если мы над базой, выполняем go down
+                humanoidRootPart.CFrame = CFrame.new(Vector3.new(currentPos.X, originalBase.Y, currentPos.Z))
+            else
+                -- Если что-то пошло не так, просто телепортируем на сохраненную высоту
+                local finalPosition = Vector3.new(currentPos.X, savedHeight, currentPos.Z)
+                humanoidRootPart.CFrame = CFrame.new(finalPosition)
+            end
+            
+            -- Восстанавливаем оригинальную базу
+            savedBasePosition = originalBase
             
             -- Выключаем Auto Steal после выполнения
             autoStealActive = false
