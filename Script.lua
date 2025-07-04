@@ -108,15 +108,15 @@ function loadMainGUI()
     local draggingGG, dragInputGG, dragStartGG, startPosGG
     local draggingMain, dragInputMain, dragStartMain, startPosMain
 
-    -- Кнопка GG (80x80)
+    -- Кнопка GG (60x60 - уменьшенный размер)
     local ToggleBtn = Instance.new("TextButton")
-    ToggleBtn.Size = UDim2.new(0, 80, 0, 80)
-    ToggleBtn.Position = UDim2.new(0, 20, 0.5, -40)
+    ToggleBtn.Size = UDim2.new(0, 60, 0, 60)
+    ToggleBtn.Position = UDim2.new(0, 10, 0.5, -30)
     ToggleBtn.BackgroundColor3 = Color3.new(0, 0, 0)
     ToggleBtn.TextColor3 = Color3.new(1, 1, 1)
     ToggleBtn.Text = "GG"
     ToggleBtn.Font = Enum.Font.GothamBlack
-    ToggleBtn.TextSize = 24
+    ToggleBtn.TextSize = 20
     ToggleBtn.ZIndex = 2
     ToggleBtn.Parent = ScreenGui
 
@@ -156,10 +156,10 @@ function loadMainGUI()
         end
     end)
 
-    -- Главное окно
+    -- Главное окно (уменьшенный размер 220x280)
     local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 240, 0, 260)
-    MainFrame.Position = UDim2.new(0, 110, 0.5, -130)
+    MainFrame.Size = UDim2.new(0, 220, 0, 280)
+    MainFrame.Position = UDim2.new(0, 80, 0.5, -140)
     MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     MainFrame.BackgroundTransparency = 0.3
     MainFrame.Visible = false
@@ -207,17 +207,20 @@ function loadMainGUI()
     local floatActive = false
     local flyActive = false
     local autoStealActive = false
+    local boostSpeedActive = false
     local savedBasePosition = nil
     local savedHeight = nil
     local espHandles = {}
     local flyConnection = nil
     local noclipConnection = nil
     local autoStealConnection = nil
+    local boostSpeedConnection = nil
+    local espConnection = nil
 
-    -- GUI для полета
+    -- GUI для полета (уменьшенный размер)
     local FlyGui = Instance.new("Frame")
-    FlyGui.Size = UDim2.new(0, 150, 0, 80)
-    FlyGui.Position = UDim2.new(0, 100, 1, -130)
+    FlyGui.Size = UDim2.new(0, 120, 0, 70)
+    FlyGui.Position = UDim2.new(0, 80, 1, -110)
     FlyGui.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     FlyGui.BackgroundTransparency = 0.3
     FlyGui.Visible = false
@@ -227,7 +230,7 @@ function loadMainGUI()
     UICornerFly.CornerRadius = UDim.new(0, 8)
     UICornerFly.Parent = FlyGui
 
-    -- Кнопки для управления полетом
+    -- Кнопки для управления полетом (уменьшенные)
     local FlyForwardBtn = Instance.new("TextButton")
     FlyForwardBtn.Size = UDim2.new(0.4, 0, 0.4, 0)
     FlyForwardBtn.Position = UDim2.new(0.3, 0, 0.1, 0)
@@ -244,25 +247,28 @@ function loadMainGUI()
     FlyBackwardBtn.TextColor3 = Color3.new(1, 1, 1)
     FlyBackwardBtn.Parent = FlyGui
 
-    -- Стиль для кнопок
+    -- Стиль для кнопок (уменьшенные)
     local function createButton(name, positionY)
         local button = Instance.new("TextButton")
-        button.Size = UDim2.new(0.9, 0, 0.12, 0)
+        button.Size = UDim2.new(0.9, 0, 0.11, 0) -- Уменьшенная высота
         button.Position = UDim2.new(0.05, 0, positionY, 0)
         button.Text = name
         button.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
         button.TextColor3 = Color3.new(1, 1, 1)
+        button.Font = Enum.Font.Gotham
+        button.TextSize = 14 -- Уменьшенный размер текста
         button.Parent = MainFrame
         return button
     end
 
     -- Создаем кнопки
     local NoclipBtn = createButton("NoClip: OFF", 0.05)
-    local ESPBtn = createButton("ESP: OFF", 0.18)
-    local FlyBtn = createButton("Fly: OFF", 0.31)
-    local SetBaseBtn = createButton("Set Base Position", 0.44)
-    local FloatBtn = createButton("Float to Base", 0.57)
-    local AutoStealBtn = createButton("Auto Steal: OFF", 0.70)
+    local ESPBtn = createButton("ESP: OFF", 0.17)
+    local FlyBtn = createButton("Fly: OFF", 0.29)
+    local SetBaseBtn = createButton("Set Base Position", 0.41)
+    local FloatBtn = createButton("Float to Base", 0.53)
+    local AutoStealBtn = createButton("Auto Steal: OFF", 0.65)
+    local BoostSpeedBtn = createButton("Boost Speed: OFF", 0.77)
 
     -- Функция для сворачивания/разворачивания GUI
     local function toggleGUI()
@@ -301,37 +307,70 @@ function loadMainGUI()
         ESPBtn.Text = "ESP: " .. (espActive and "ON" or "OFF")
         ESPBtn.BackgroundColor3 = espActive and Color3.fromRGB(50, 120, 50) or Color3.fromRGB(70, 70, 70)
         
+        -- Очищаем предыдущие подсветки
+        for _, highlight in pairs(espHandles) do
+            if highlight then
+                highlight:Destroy()
+            end
+        end
+        espHandles = {}
+        
+        if espConnection then
+            espConnection:Disconnect()
+            espConnection = nil
+        end
+        
         if espActive then
-            for _, targetPlayer in ipairs(Players:GetPlayers()) do
+            -- Функция для создания подсветки
+            local function createHighlight(targetPlayer)
+                if targetPlayer.Character then
+                    local highlight = Instance.new("Highlight")
+                    highlight.Adornee = targetPlayer.Character
+                    highlight.FillTransparency = 1
+                    highlight.OutlineColor = Color3.new(1, 1, 1)
+                    highlight.Parent = targetPlayer.Character
+                    espHandles[targetPlayer] = highlight
+                end
+            end
+            
+            -- Обработчик для новых игроков
+            local function onPlayerAdded(targetPlayer)
                 if targetPlayer ~= player then
-                    if targetPlayer.Character then
-                        local highlight = Instance.new("Highlight")
-                        highlight.Adornee = targetPlayer.Character
-                        highlight.FillTransparency = 1
-                        highlight.OutlineColor = Color3.new(1, 1, 1)
-                        highlight.Parent = targetPlayer.Character
-                        espHandles[targetPlayer] = highlight
-                    end
+                    -- Создаем подсветку сразу, если персонаж уже есть
+                    createHighlight(targetPlayer)
                     
-                    targetPlayer.CharacterAdded:Connect(function(char)
+                    -- Обработчик для появления персонажа
+                    targetPlayer.CharacterAdded:Connect(function(character)
                         if espActive then
-                            local newHighlight = Instance.new("Highlight")
-                            newHighlight.Adornee = char
-                            newHighlight.FillTransparency = 1
-                            newHighlight.OutlineColor = Color3.new(1, 1, 1)
-                            newHighlight.Parent = char
-                            espHandles[targetPlayer] = newHighlight
+                            createHighlight(targetPlayer)
                         end
                     end)
                 end
             end
-        else
-            for _, highlight in pairs(espHandles) do
-                if highlight then
-                    highlight:Destroy()
+            
+            -- Обработчик для уже существующих игроков
+            for _, targetPlayer in ipairs(Players:GetPlayers()) do
+                if targetPlayer ~= player then
+                    onPlayerAdded(targetPlayer)
                 end
             end
-            espHandles = {}
+            
+            -- Подключаем обработчик новых игроков
+            Players.PlayerAdded:Connect(onPlayerAdded)
+            
+            -- Зацикленный ESP
+            espConnection = RunService.Heartbeat:Connect(function()
+                if not espActive then return end
+                
+                for targetPlayer, highlight in pairs(espHandles) do
+                    if targetPlayer and highlight then
+                        if targetPlayer.Character and highlight.Parent ~= targetPlayer.Character then
+                            highlight.Adornee = targetPlayer.Character
+                            highlight.Parent = targetPlayer.Character
+                        end
+                    end
+                end
+            end)
         end
     end
 
@@ -485,7 +524,7 @@ function loadMainGUI()
         local startTime = tick()
         local speed = 40
         local minDistanceToStop = 3
-        local targetHeight = savedBasePosition.Y + 10 -- Набираем высоту сразу
+        local targetHeight = savedBasePosition.Y + 10
         
         local connection
         connection = RunService.Heartbeat:Connect(function()
@@ -517,12 +556,11 @@ function loadMainGUI()
                 return
             end
             
-            -- Плавное движение с немедленным набором высоты
             humanoidRootPart.Velocity = direction * speed
         end)
     end
 
-    -- Auto Steal функция с проверкой сохраненной базы и go down
+    -- Auto Steal функция
     local function toggleAutoSteal()
         if not savedBasePosition then
             StarterGui:SetCore("SendNotification", {
@@ -549,52 +587,96 @@ function loadMainGUI()
             local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
             if not humanoidRootPart then return end
             
-            -- Сохраняем текущую высоту
             savedHeight = humanoidRootPart.Position.Y
             
-            -- Телепортируем вверх на 200 шагов
             local targetPosition = humanoidRootPart.Position + Vector3.new(0, 200, 0)
             humanoidRootPart.CFrame = CFrame.new(targetPosition)
             
-            -- Ждем 2 секунды
             task.wait(2)
             
-            -- Модифицируем позицию базы, чтобы она была в небе
             local skyBase = Vector3.new(savedBasePosition.X, humanoidRootPart.Position.Y, savedBasePosition.Z)
-            
-            -- Временно сохраняем оригинальную базу
             local originalBase = savedBasePosition
             savedBasePosition = skyBase
             
-            -- Активируем Float
             floatToBase()
             
-            -- Ждем пока Float завершится
             while floatActive do
                 task.wait()
             end
             
-            -- Проверяем, достигли ли мы позиции над базой
             local currentPos = humanoidRootPart.Position
             local baseXZ = Vector3.new(originalBase.X, 0, originalBase.Z)
             local currentXZ = Vector3.new(currentPos.X, 0, currentPos.Z)
             
             if (baseXZ - currentXZ).Magnitude < 5 then
-                -- Если мы над базой, выполняем go down
                 humanoidRootPart.CFrame = CFrame.new(Vector3.new(currentPos.X, originalBase.Y, currentPos.Z))
             else
-                -- Если что-то пошло не так, просто телепортируем на сохраненную высоту
                 local finalPosition = Vector3.new(currentPos.X, savedHeight, currentPos.Z)
                 humanoidRootPart.CFrame = CFrame.new(finalPosition)
             end
             
-            -- Восстанавливаем оригинальную базу
             savedBasePosition = originalBase
-            
-            -- Выключаем Auto Steal после выполнения
             autoStealActive = false
             AutoStealBtn.Text = "Auto Steal: OFF"
             AutoStealBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        end
+    end
+
+    -- Boost Speed функция - быстрый "полет" вперед с управлением через камеру
+    local function toggleBoostSpeed()
+        boostSpeedActive = not boostSpeedActive
+        BoostSpeedBtn.Text = "Boost Speed: " .. (boostSpeedActive and "ON" or "OFF")
+        BoostSpeedBtn.BackgroundColor3 = boostSpeedActive and Color3.fromRGB(50, 120, 50) or Color3.fromRGB(70, 70, 70)
+        
+        if boostSpeedConnection then
+            boostSpeedConnection:Disconnect()
+            boostSpeedConnection = nil
+        end
+        
+        if boostSpeedActive then
+            local character = player.Character
+            if not character then return end
+            
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
+            end
+            
+            local hrp = character:FindFirstChild("HumanoidRootPart")
+            if not hrp then return end
+            
+            local speed = 50
+            
+            boostSpeedConnection = RunService.Heartbeat:Connect(function()
+                if not boostSpeedActive or not character or not character.Parent then
+                    if boostSpeedConnection then boostSpeedConnection:Disconnect() end
+                    return
+                end
+                
+                if not hrp or not hrp.Parent then
+                    if boostSpeedConnection then boostSpeedConnection:Disconnect() end
+                    return
+                end
+                
+                -- Получаем направление взгляда камеры (без вертикальной составляющей)
+                local camera = workspace.CurrentCamera
+                local lookVector = camera.CFrame.LookVector
+                lookVector = Vector3.new(lookVector.X, 0, lookVector.Z).Unit
+                
+                -- Применяем движение вперед с возможностью поворота через камеру
+                hrp.Velocity = lookVector * speed
+                
+                -- Фиксируем высоту, чтобы персонаж не поднимался в воздух
+                local currentPosition = hrp.Position
+                hrp.Position = Vector3.new(currentPosition.X, currentPosition.Y, currentPosition.Z)
+            end)
+        else
+            if player.Character then
+                local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    hrp.Velocity = Vector3.new(0, 0, 0)
+                end
+            end
         end
     end
 
@@ -620,10 +702,21 @@ function loadMainGUI()
             NoclipBtn.Text = "NoClip: OFF"
             NoclipBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
         end
+        
         if espActive then
+            -- Очищаем старые подсветки
+            for _, highlight in pairs(espHandles) do
+                if highlight then
+                    highlight:Destroy()
+                end
+            end
+            espHandles = {}
+            
+            -- Перезапускаем ESP
             toggleESP()
             toggleESP()
         end
+        
         if flyActive then
             if flyConnection then
                 flyConnection:Disconnect()
@@ -634,10 +727,12 @@ function loadMainGUI()
             FlyBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
             FlyGui.Visible = false
         end
+        
         if floatActive then
             floatActive = false
             FloatBtn.Text = "Float to Base"
         end
+        
         if autoStealActive then
             if autoStealConnection then
                 autoStealConnection:Disconnect()
@@ -646,6 +741,16 @@ function loadMainGUI()
             autoStealActive = false
             AutoStealBtn.Text = "Auto Steal: OFF"
             AutoStealBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        end
+        
+        if boostSpeedActive then
+            if boostSpeedConnection then
+                boostSpeedConnection:Disconnect()
+                boostSpeedConnection = nil
+            end
+            boostSpeedActive = false
+            BoostSpeedBtn.Text = "Boost Speed: OFF"
+            BoostSpeedBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
         end
     end)
 
@@ -656,4 +761,5 @@ function loadMainGUI()
     SetBaseBtn.MouseButton1Click:Connect(setBase)
     FloatBtn.MouseButton1Click:Connect(floatToBase)
     AutoStealBtn.MouseButton1Click:Connect(toggleAutoSteal)
+    BoostSpeedBtn.MouseButton1Click:Connect(toggleBoostSpeed)
 end
