@@ -7,7 +7,7 @@ local StarterGui = game:GetService("StarterGui")
 
 -- Константы
 local TELEGRAM_LINK = "https://t.me/ggscriptsezz"
-local CORRECT_KEY = "1234"
+local CORRECT_KEY = "50956gy"
 
 -- Основной GUI
 local ScreenGui = Instance.new("ScreenGui")
