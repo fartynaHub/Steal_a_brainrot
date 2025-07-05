@@ -6,6 +6,7 @@ local TextService = game:GetService("TextService")
 local StarterGui = game:GetService("StarterGui")
 
 -- Константы
+local LINKVERTISE_LINK = "https://link-center.net/1368071/1swLRhKVHuFF"
 local TELEGRAM_LINK = "https://t.me/ggscriptsezz"
 local CORRECT_KEY = "94h35k1"
 
@@ -58,15 +59,26 @@ SubmitButton.Font = Enum.Font.Gotham
 SubmitButton.TextSize = 16
 SubmitButton.Parent = AuthFrame
 
-local TelegramButton = Instance.new("TextButton")
-TelegramButton.Size = UDim2.new(0.8, 0, 0, 35)
-TelegramButton.Position = UDim2.new(0.1, 0, 0.8, 0)
-TelegramButton.Text = "Получить ключ (Telegram)"
-TelegramButton.BackgroundColor3 = Color3.fromRGB(0, 136, 204)
-TelegramButton.TextColor3 = Color3.new(1, 1, 1)
-TelegramButton.Font = Enum.Font.Gotham
-TelegramButton.TextSize = 14
-TelegramButton.Parent = AuthFrame
+local LinkvertiseButton = Instance.new("TextButton")
+LinkvertiseButton.Size = UDim2.new(0.8, 0, 0, 35)
+LinkvertiseButton.Position = UDim2.new(0.1, 0, 0.8, 0)
+LinkvertiseButton.Text = "Получить ключ (Linkvertise)"
+LinkvertiseButton.BackgroundColor3 = Color3.fromRGB(0, 180, 120)
+LinkvertiseButton.TextColor3 = Color3.new(1, 1, 1)
+LinkvertiseButton.Font = Enum.Font.Gotham
+LinkvertiseButton.TextSize = 14
+LinkvertiseButton.Parent = AuthFrame
+
+-- Маленькая кнопка Telegram внизу
+local TelegramLink = Instance.new("TextButton")
+TelegramLink.Size = UDim2.new(0.4, 0, 0, 20)
+TelegramLink.Position = UDim2.new(0.3, 0, 1.05, 0)
+TelegramLink.Text = "Telegram"
+TelegramLink.BackgroundColor3 = Color3.fromRGB(0, 136, 204)
+TelegramLink.TextColor3 = Color3.new(1, 1, 1)
+TelegramLink.Font = Enum.Font.Gotham
+TelegramLink.TextSize = 12
+TelegramLink.Parent = AuthFrame
 
 -- Функция для копирования в буфер обмена
 local function copyToClipboard(text)
@@ -80,11 +92,18 @@ local function copyToClipboard(text)
     end)
 end
 
-TelegramButton.MouseButton1Click:Connect(function()
-    copyToClipboard(TELEGRAM_LINK)
-    TelegramButton.Text = "Ссылка скопирована!"
+LinkvertiseButton.MouseButton1Click:Connect(function()
+    copyToClipboard(LINKVERTISE_LINK)
+    LinkvertiseButton.Text = "Ссылка скопирована!"
     task.wait(1.5)
-    TelegramButton.Text = "Получить ключ (Telegram)"
+    LinkvertiseButton.Text = "Получить ключ (Linkvertise)"
+end)
+
+TelegramLink.MouseButton1Click:Connect(function()
+    copyToClipboard(TELEGRAM_LINK)
+    TelegramLink.Text = "Скопировано!"
+    task.wait(1.5)
+    TelegramLink.Text = "Telegram"
 end)
 
 local function checkKey(inputKey)
