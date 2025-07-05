@@ -5,18 +5,26 @@ local player = Players.LocalPlayer
 local TextService = game:GetService("TextService")
 local StarterGui = game:GetService("StarterGui")
 
--- Константы
-local LINKVERTISE_LINK = "https://link-center.net/1368071/1swLRhKVHuFF"
-local TELEGRAM_LINK = "https://t.me/ggscriptsezz"
-local CORRECT_KEY = "94h35k1"
+local function createNotification(title, text, duration)
+    StarterGui:SetCore("SendNotification", {
+        Title = title,
+        Text = text,
+        Duration = duration
+    })
+end
 
--- Основной GUI
+local function copyToClipboard(text)
+    pcall(function()
+        createNotification("Ссылка скопирована", "Теперь вы можете вставить её в браузере", 2)
+        setclipboard(text)
+    end)
+end
+
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MobileBrainrotGUI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Окно авторизации
 local AuthFrame = Instance.new("Frame")
 AuthFrame.Size = UDim2.new(0, 300, 0, 200)
 AuthFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
@@ -69,7 +77,6 @@ LinkvertiseButton.Font = Enum.Font.Gotham
 LinkvertiseButton.TextSize = 14
 LinkvertiseButton.Parent = AuthFrame
 
--- Маленькая кнопка Telegram внизу
 local TelegramLink = Instance.new("TextButton")
 TelegramLink.Size = UDim2.new(0.4, 0, 0, 20)
 TelegramLink.Position = UDim2.new(0.3, 0, 1.05, 0)
@@ -80,16 +87,20 @@ TelegramLink.Font = Enum.Font.Gotham
 TelegramLink.TextSize = 12
 TelegramLink.Parent = AuthFrame
 
--- Функция для копирования в буфер обмена
-local function copyToClipboard(text)
-    pcall(function()
-        StarterGui:SetCore("SendNotification", {
-            Title = "Ссылка скопирована",
-            Text = "Теперь вы можете вставить её в браузере",
-            Duration = 2
-        })
-        setclipboard(text)
-    end)
+local LINKVERTISE_LINK = "https://link-center.net/1368071/1swLRhKVHuFF"
+local TELEGRAM_LINK = "https://t.me/ggscriptsezz"
+local CORRECT_KEY = "94h35k1"
+
+local function checkKey(inputKey)
+    return inputKey == CORRECT_KEY
+end
+
+local function handleKeySubmission(inputKey)
+    if checkKey(inputKey) then
+        return true
+    else
+        return false
+    end
 end
 
 LinkvertiseButton.MouseButton1Click:Connect(function()
@@ -106,13 +117,9 @@ TelegramLink.MouseButton1Click:Connect(function()
     TelegramLink.Text = "Telegram"
 end)
 
-local function checkKey(inputKey)
-    return inputKey == CORRECT_KEY
-end
-
 SubmitButton.MouseButton1Click:Connect(function()
     local inputKey = KeyBox.Text
-    if checkKey(inputKey) then
+    if handleKeySubmission(inputKey) then
         AuthFrame:Destroy()
         loadMainGUI()
     else
@@ -121,13 +128,10 @@ SubmitButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- Основной GUI
 function loadMainGUI()
-    -- Переменные для перемещения GUI
     local draggingGG, dragInputGG, dragStartGG, startPosGG
     local draggingMain, dragInputMain, dragStartMain, startPosMain
 
-    -- Кнопка GG (60x60 - уменьшенный размер)
     local ToggleBtn = Instance.new("TextButton")
     ToggleBtn.Size = UDim2.new(0, 60, 0, 60)
     ToggleBtn.Position = UDim2.new(0, 10, 0.5, -30)
@@ -143,7 +147,6 @@ function loadMainGUI()
     UICornerGG.CornerRadius = UDim.new(0, 12)
     UICornerGG.Parent = ToggleBtn
 
-    -- Функции для перемещения GG кнопки
     local function updateGGInput(input)
         local delta = input.Position - dragStartGG
         ToggleBtn.Position = UDim2.new(0, startPosGG.X.Offset + delta.X, 0, startPosGG.Y.Offset + delta.Y)
@@ -175,7 +178,6 @@ function loadMainGUI()
         end
     end)
 
-    -- Главное окно (уменьшенный размер 220x280)
     local MainFrame = Instance.new("Frame")
     MainFrame.Size = UDim2.new(0, 220, 0, 280)
     MainFrame.Position = UDim2.new(0, 80, 0.5, -140)
@@ -188,7 +190,6 @@ function loadMainGUI()
     UICorner.CornerRadius = UDim.new(0, 8)
     UICorner.Parent = MainFrame
 
-    -- Функции для перемещения главного окна
     local function updateMainInput(input)
         local delta = input.Position - dragStartMain
         MainFrame.Position = UDim2.new(0, startPosMain.X.Offset + delta.X, 0, startPosMain.Y.Offset + delta.Y)
@@ -220,7 +221,6 @@ function loadMainGUI()
         end
     end)
 
-    -- Переменные состояния
     local noclipActive = false
     local espActive = false
     local floatActive = false
@@ -236,7 +236,6 @@ function loadMainGUI()
     local boostSpeedConnection = nil
     local espConnection = nil
 
-    -- GUI для полета (уменьшенный размер)
     local FlyGui = Instance.new("Frame")
     FlyGui.Size = UDim2.new(0, 120, 0, 70)
     FlyGui.Position = UDim2.new(0, 80, 1, -110)
@@ -249,7 +248,6 @@ function loadMainGUI()
     UICornerFly.CornerRadius = UDim.new(0, 8)
     UICornerFly.Parent = FlyGui
 
-    -- Кнопки для управления полетом (уменьшенные)
     local FlyForwardBtn = Instance.new("TextButton")
     FlyForwardBtn.Size = UDim2.new(0.4, 0, 0.4, 0)
     FlyForwardBtn.Position = UDim2.new(0.3, 0, 0.1, 0)
@@ -266,21 +264,19 @@ function loadMainGUI()
     FlyBackwardBtn.TextColor3 = Color3.new(1, 1, 1)
     FlyBackwardBtn.Parent = FlyGui
 
-    -- Стиль для кнопок (уменьшенные)
     local function createButton(name, positionY)
         local button = Instance.new("TextButton")
-        button.Size = UDim2.new(0.9, 0, 0.11, 0) -- Уменьшенная высота
+        button.Size = UDim2.new(0.9, 0, 0.11, 0)
         button.Position = UDim2.new(0.05, 0, positionY, 0)
         button.Text = name
         button.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
         button.TextColor3 = Color3.new(1, 1, 1)
         button.Font = Enum.Font.Gotham
-        button.TextSize = 14 -- Уменьшенный размер текста
+        button.TextSize = 14
         button.Parent = MainFrame
         return button
     end
 
-    -- Создаем кнопки
     local NoclipBtn = createButton("NoClip: OFF", 0.05)
     local ESPBtn = createButton("ESP: OFF", 0.17)
     local FlyBtn = createButton("Fly: OFF", 0.29)
@@ -289,14 +285,12 @@ function loadMainGUI()
     local AutoStealBtn = createButton("Auto Steal: OFF", 0.65)
     local BoostSpeedBtn = createButton("Boost Speed: OFF", 0.77)
 
-    -- Функция для сворачивания/разворачивания GUI
     local function toggleGUI()
         MainFrame.Visible = not MainFrame.Visible
     end
 
     ToggleBtn.MouseButton1Click:Connect(toggleGUI)
 
-    -- NoClip функция
     local function toggleNoclip()
         noclipActive = not noclipActive
         NoclipBtn.Text = "NoClip: " .. (noclipActive and "ON" or "OFF")
@@ -320,13 +314,11 @@ function loadMainGUI()
         end
     end
 
-    -- ESP функция
     local function toggleESP()
         espActive = not espActive
         ESPBtn.Text = "ESP: " .. (espActive and "ON" or "OFF")
         ESPBtn.BackgroundColor3 = espActive and Color3.fromRGB(50, 120, 50) or Color3.fromRGB(70, 70, 70)
         
-        -- Очищаем предыдущие подсветки
         for _, highlight in pairs(espHandles) do
             if highlight then
                 highlight:Destroy()
@@ -340,7 +332,6 @@ function loadMainGUI()
         end
         
         if espActive then
-            -- Функция для создания подсветки
             local function createHighlight(targetPlayer)
                 if targetPlayer.Character then
                     local highlight = Instance.new("Highlight")
@@ -352,13 +343,10 @@ function loadMainGUI()
                 end
             end
             
-            -- Обработчик для новых игроков
             local function onPlayerAdded(targetPlayer)
                 if targetPlayer ~= player then
-                    -- Создаем подсветку сразу, если персонаж уже есть
                     createHighlight(targetPlayer)
                     
-                    -- Обработчик для появления персонажа
                     targetPlayer.CharacterAdded:Connect(function(character)
                         if espActive then
                             createHighlight(targetPlayer)
@@ -367,17 +355,14 @@ function loadMainGUI()
                 end
             end
             
-            -- Обработчик для уже существующих игроков
             for _, targetPlayer in ipairs(Players:GetPlayers()) do
                 if targetPlayer ~= player then
                     onPlayerAdded(targetPlayer)
                 end
             end
             
-            -- Подключаем обработчик новых игроков
             Players.PlayerAdded:Connect(onPlayerAdded)
             
-            -- Зацикленный ESP
             espConnection = RunService.Heartbeat:Connect(function()
                 if not espActive then return end
                 
@@ -393,7 +378,6 @@ function loadMainGUI()
         end
     end
 
-    -- Fly функция с исправленными направлениями
     local function toggleFly()
         flyActive = not flyActive
         FlyBtn.Text = "Fly: " .. (flyActive and "ON" or "OFF")
@@ -421,7 +405,6 @@ function loadMainGUI()
             local moveDirection = Vector3.new(0, 0, 0)
             local verticalSpeed = 0
             
-            -- Обработчики кнопок полета
             local forwardActive = false
             local backwardActive = false
             
@@ -452,31 +435,25 @@ function loadMainGUI()
                     return
                 end
                 
-                -- Получаем направление взгляда камеры
                 local camera = workspace.CurrentCamera
                 local lookVector = camera.CFrame.LookVector
                 
-                -- Вертикальное движение
                 verticalSpeed = lookVector.Y * flySpeed
                 
-                -- Сбрасываем направление движения
                 moveDirection = Vector3.new(0, 0, 0)
                 
-                -- Управление с исправленными направлениями
                 if forwardActive then
-                    moveDirection = moveDirection + lookVector  -- Вперёд
+                    moveDirection = moveDirection + lookVector
                 end
                 
                 if backwardActive then
-                    moveDirection = moveDirection - lookVector  -- Назад
+                    moveDirection = moveDirection - lookVector
                 end
                 
-                -- Нормализация вектора
                 if moveDirection.Magnitude > 0 then
                     moveDirection = moveDirection.Unit
                 end
                 
-                -- Применяем движение
                 hrp.Velocity = Vector3.new(
                     moveDirection.X * flySpeed,
                     verticalSpeed,
@@ -493,7 +470,6 @@ function loadMainGUI()
         end
     end
 
-    -- Set Base функция
     local function setBase()
         local character = player.Character
         if not character then return end
@@ -508,15 +484,10 @@ function loadMainGUI()
         end)
     end
 
-    -- Float функция с немедленным набором высоты
     local function floatToBase()
         if floatActive or not savedBasePosition then 
             if not savedBasePosition then
-                StarterGui:SetCore("SendNotification", {
-                    Title = "Ошибка",
-                    Text = "Базовая позиция не установлена",
-                    Duration = 3
-                })
+                createNotification("Ошибка", "Базовая позиция не установлена", 3)
             end
             return 
         end
@@ -579,14 +550,9 @@ function loadMainGUI()
         end)
     end
 
-    -- Auto Steal функция
     local function toggleAutoSteal()
         if not savedBasePosition then
-            StarterGui:SetCore("SendNotification", {
-                Title = "Ошибка",
-                Text = "Сначала сохраните позицию базы",
-                Duration = 3
-            })
+            createNotification("Ошибка", "Сначала сохраните позицию базы", 3)
             return
         end
         
@@ -641,7 +607,6 @@ function loadMainGUI()
         end
     end
 
-    -- Boost Speed функция - быстрый "полет" вперед с управлением через камеру
     local function toggleBoostSpeed()
         boostSpeedActive = not boostSpeedActive
         BoostSpeedBtn.Text = "Boost Speed: " .. (boostSpeedActive and "ON" or "OFF")
@@ -677,15 +642,12 @@ function loadMainGUI()
                     return
                 end
                 
-                -- Получаем направление взгляда камеры (без вертикальной составляющей)
                 local camera = workspace.CurrentCamera
                 local lookVector = camera.CFrame.LookVector
                 lookVector = Vector3.new(lookVector.X, 0, lookVector.Z).Unit
                 
-                -- Применяем движение вперед с возможностью поворота через камеру
                 hrp.Velocity = lookVector * speed
                 
-                -- Фиксируем высоту, чтобы персонаж не поднимался в воздух
                 local currentPosition = hrp.Position
                 hrp.Position = Vector3.new(currentPosition.X, currentPosition.Y, currentPosition.Z)
             end)
@@ -699,7 +661,6 @@ function loadMainGUI()
         end
     end
 
-    -- Автовосстановление после смерти
     player.CharacterAdded:Connect(function(character)
         for _, part in pairs(character:GetDescendants()) do
             if part:IsA("BasePart") then
@@ -723,7 +684,6 @@ function loadMainGUI()
         end
         
         if espActive then
-            -- Очищаем старые подсветки
             for _, highlight in pairs(espHandles) do
                 if highlight then
                     highlight:Destroy()
@@ -731,7 +691,6 @@ function loadMainGUI()
             end
             espHandles = {}
             
-            -- Перезапускаем ESP
             toggleESP()
             toggleESP()
         end
@@ -773,7 +732,6 @@ function loadMainGUI()
         end
     end)
 
-    -- Подключение кнопок
     NoclipBtn.MouseButton1Click:Connect(toggleNoclip)
     ESPBtn.MouseButton1Click:Connect(toggleESP)
     FlyBtn.MouseButton1Click:Connect(toggleFly)
