@@ -89,7 +89,7 @@ TelegramLink.Parent = AuthFrame
 
 local LINKVERTISE_LINK = "https://link-center.net/1368071/1swLRhKVHuFF"
 local TELEGRAM_LINK = "https://t.me/ggscriptsezz"
-local CORRECT_KEY = "94h35k1"
+local CORRECT_KEY = "10ko57cl69"
 
 local function checkKey(inputKey)
     return inputKey == CORRECT_KEY
