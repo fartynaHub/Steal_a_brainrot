@@ -89,11 +89,42 @@ TelegramLink.Parent = AuthFrame
 
 local LINKVERTISE_LINK = "https://link-center.net/1368071/1swLRhKVHuFF"
 local TELEGRAM_LINK = "https://t.me/ggscriptsezz"
-local CORRECT_KEY = "Y37gx60n"
+local CORRECT_KEY = "10ko57cl69"
 
 local function checkKey(inputKey)
     return inputKey == CORRECT_KEY
 end
+
+local random = math.random(1,6)
+    if random == 1 then 
+	CORRECT_KEY = "Ow930kwqm"
+	LINKVERTISE_LINK = "https://link-center.net/1368071/1swLRhKVHuFF"
+    end
+    
+    if random == 2 then
+	CORRECT_KEY = "04JLvb3"
+	LINKVERTISE_LINK = "https://link-center.net/1368071/rlpudRaLTbvw"
+    end
+
+    if random == 3 then
+	CORRECT_KEY = "H8ka9lp02"
+	LINKVERTISE_LINK = "https://link-center.net/1368071/2me4DIc4wwOT"
+    end
+
+    if random == 4 then
+	CORRECT_KEY = "Eu52nd6419"
+	LINKVERTISE_LINK = "https://link-hub.net/1368071/piDNay87c6xc"
+    end
+
+    if random == 5 then
+	CORRECT_KEY = "He338jel0l"
+	LINKVERTISE_LINK = "https://direct-link.net/1368071/JVYfcPMRm5wY"
+    end
+
+    if random == 6 then
+	CORRECT_KEY = "Lza89mfnw"
+	LINKVERTISE_LINK = "https://link-target.net/1368071/QYNh8latAtKH"
+    end
 
 local function handleKeySubmission(inputKey)
     if checkKey(inputKey) then
