@@ -5,6 +5,58 @@ local player = Players.LocalPlayer
 local TextService = game:GetService("TextService")
 local StarterGui = game:GetService("StarterGui")
 
+local function createESP(targetPlayer)
+    if not targetPlayer or not targetPlayer.Character then return end
+    
+    local character = targetPlayer.Character
+    
+    if character:FindFirstChild("ESP_Highlight") then
+        character.ESP_Highlight:Destroy()
+    end
+    
+    if character:FindFirstChild("ESP_Billboard") then
+        character.ESP_Billboard:Destroy()
+    end
+    
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "ESP_Highlight"
+    highlight.Adornee = character
+    highlight.FillColor = Color3.fromRGB(255, 0, 0)
+    highlight.FillTransparency = 0.5
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    highlight.OutlineTransparency = 0
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    highlight.Parent = character
+    
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    if humanoidRootPart then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = "ESP_Billboard"
+        billboard.AlwaysOnTop = true
+        billboard.Size = UDim2.new(4, 0, 1, 0)
+        billboard.StudsOffset = Vector3.new(0, 3, 0)
+        billboard.Adornee = humanoidRootPart
+        billboard.LightInfluence = 0
+        billboard.Parent = humanoidRootPart
+        
+        local nameLabel = Instance.new("TextLabel")
+        nameLabel.Text = targetPlayer.Name
+        nameLabel.TextColor3 = Color3.new(1, 1, 1)
+        nameLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+        nameLabel.TextStrokeTransparency = 0
+        nameLabel.TextSize = 14
+        nameLabel.Font = Enum.Font.GothamBold
+        nameLabel.BackgroundTransparency = 1
+        nameLabel.Size = UDim2.new(1, 0, 1, 0)
+        nameLabel.Parent = billboard
+    end
+    
+    return {
+        highlight = highlight,
+        billboard = billboard
+    }
+end
+
 local function createNotification(title, text, duration)
     StarterGui:SetCore("SendNotification", {
         Title = title,
@@ -96,35 +148,25 @@ local function checkKey(inputKey)
 end
 
 local random = math.random(1,6)
-    if random == 1 then 
-	CORRECT_KEY = "Ow930kwqm"
-	LINKVERTISE_LINK = "https://link-center.net/1368071/1swLRhKVHuFF"
-    end
-    
-    if random == 2 then
-	CORRECT_KEY = "04JLvb3"
-	LINKVERTISE_LINK = "https://link-center.net/1368071/rlpudRaLTbvw"
-    end
-
-    if random == 3 then
-	CORRECT_KEY = "H8ka9lp02"
-	LINKVERTISE_LINK = "https://link-center.net/1368071/2me4DIc4wwOT"
-    end
-
-    if random == 4 then
-	CORRECT_KEY = "Eu52nd6419"
-	LINKVERTISE_LINK = "https://link-hub.net/1368071/piDNay87c6xc"
-    end
-
-    if random == 5 then
-	CORRECT_KEY = "He338jel0l"
-	LINKVERTISE_LINK = "https://direct-link.net/1368071/JVYfcPMRm5wY"
-    end
-
-    if random == 6 then
-	CORRECT_KEY = "Lza89mfnw"
-	LINKVERTISE_LINK = "https://link-target.net/1368071/QYNh8latAtKH"
-    end
+if random == 1 then 
+    CORRECT_KEY = "Ow930kwqm"
+    LINKVERTISE_LINK = "https://link-center.net/1368071/1swLRhKVHuFF"
+elseif random == 2 then
+    CORRECT_KEY = "04JLvb3"
+    LINKVERTISE_LINK = "https://link-center.net/1368071/rlpudRaLTbvw"
+elseif random == 3 then
+    CORRECT_KEY = "H8ka9lp02"
+    LINKVERTISE_LINK = "https://link-center.net/1368071/2me4DIc4wwOT"
+elseif random == 4 then
+    CORRECT_KEY = "Eu52nd6419"
+    LINKVERTISE_LINK = "https://link-hub.net/1368071/piDNay87c6xc"
+elseif random == 5 then
+    CORRECT_KEY = "He338jel0l"
+    LINKVERTISE_LINK = "https://direct-link.net/1368071/JVYfcPMRm5wY"
+elseif random == 6 then
+    CORRECT_KEY = "Lza89mfnw"
+    LINKVERTISE_LINK = "https://link-target.net/1368071/QYNh8latAtKH"
+end
 
 local function handleKeySubmission(inputKey)
     if checkKey(inputKey) then
@@ -210,8 +252,8 @@ function loadMainGUI()
     end)
 
     local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 220, 0, 280)
-    MainFrame.Position = UDim2.new(0, 80, 0.5, -140)
+    MainFrame.Size = UDim2.new(0, 220, 0, 250)
+    MainFrame.Position = UDim2.new(0, 80, 0.5, -125)
     MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     MainFrame.BackgroundTransparency = 0.3
     MainFrame.Visible = false
@@ -252,6 +294,38 @@ function loadMainGUI()
         end
     end)
 
+    local function createButton(name, positionY)
+        local button = Instance.new("TextButton")
+        button.Size = UDim2.new(0.9, 0, 0, 28)
+        button.Position = UDim2.new(0.05, 0, 0.05 + positionY * 0.12, 0)
+        button.Text = name
+        button.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        button.TextColor3 = Color3.new(1, 1, 1)
+        button.Font = Enum.Font.Gotham
+        button.TextSize = 14
+        button.Parent = MainFrame
+        
+        local uiCorner = Instance.new("UICorner")
+        uiCorner.CornerRadius = UDim.new(0, 6)
+        uiCorner.Parent = button
+        
+        return button
+    end
+
+    local NoclipBtn = createButton("NoClip: OFF", 0)
+    local ESPBtn = createButton("ESP: OFF", 1)
+    local FlyBtn = createButton("Fly: OFF", 2)
+    local SetBaseBtn = createButton("Set Base Position", 3)
+    local FloatBtn = createButton("Float to Base", 4)
+    local AutoStealBtn = createButton("Auto Steal: OFF", 5)
+    local BoostSpeedBtn = createButton("Boost Speed: OFF", 6)
+
+    local function toggleGUI()
+        MainFrame.Visible = not MainFrame.Visible
+    end
+
+    ToggleBtn.MouseButton1Click:Connect(toggleGUI)
+
     local noclipActive = false
     local espActive = false
     local floatActive = false
@@ -266,6 +340,9 @@ function loadMainGUI()
     local autoStealConnection = nil
     local boostSpeedConnection = nil
     local espConnection = nil
+    local floatConnection = nil
+    local autoStealTimer = nil
+    local autoStealCooldown = false
 
     local FlyGui = Instance.new("Frame")
     FlyGui.Size = UDim2.new(0, 120, 0, 70)
@@ -295,34 +372,51 @@ function loadMainGUI()
     FlyBackwardBtn.TextColor3 = Color3.new(1, 1, 1)
     FlyBackwardBtn.Parent = FlyGui
 
-    local function createButton(name, positionY)
-        local button = Instance.new("TextButton")
-        button.Size = UDim2.new(0.9, 0, 0.11, 0)
-        button.Position = UDim2.new(0.05, 0, positionY, 0)
-        button.Text = name
-        button.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-        button.TextColor3 = Color3.new(1, 1, 1)
-        button.Font = Enum.Font.Gotham
-        button.TextSize = 14
-        button.Parent = MainFrame
-        return button
+    local function disableAllFunctions()
+        if noclipActive then 
+            noclipActive = false
+            NoclipBtn.Text = "NoClip: OFF"
+            NoclipBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+            if noclipConnection then
+                noclipConnection:Disconnect()
+                noclipConnection = nil
+            end
+        end
+        
+        if flyActive then 
+            flyActive = false
+            FlyBtn.Text = "Fly: OFF"
+            FlyBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+            FlyGui.Visible = false
+            if flyConnection then
+                flyConnection:Disconnect()
+                flyConnection = nil
+            end
+        end
+        
+        if floatActive then 
+            floatActive = false
+            FloatBtn.Text = "Float to Base"
+            if floatConnection then
+                floatConnection:Disconnect()
+                floatConnection = nil
+            end
+        end
+        
+        if boostSpeedActive then 
+            boostSpeedActive = false
+            BoostSpeedBtn.Text = "Boost Speed: OFF"
+            BoostSpeedBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+            if boostSpeedConnection then
+                boostSpeedConnection:Disconnect()
+                boostSpeedConnection = nil
+            end
+        end
     end
-
-    local NoclipBtn = createButton("NoClip: OFF", 0.05)
-    local ESPBtn = createButton("ESP: OFF", 0.17)
-    local FlyBtn = createButton("Fly: OFF", 0.29)
-    local SetBaseBtn = createButton("Set Base Position", 0.41)
-    local FloatBtn = createButton("Float to Base", 0.53)
-    local AutoStealBtn = createButton("Auto Steal: OFF", 0.65)
-    local BoostSpeedBtn = createButton("Boost Speed: OFF", 0.77)
-
-    local function toggleGUI()
-        MainFrame.Visible = not MainFrame.Visible
-    end
-
-    ToggleBtn.MouseButton1Click:Connect(toggleGUI)
 
     local function toggleNoclip()
+        if autoStealActive then return end
+        
         noclipActive = not noclipActive
         NoclipBtn.Text = "NoClip: " .. (noclipActive and "ON" or "OFF")
         NoclipBtn.BackgroundColor3 = noclipActive and Color3.fromRGB(50, 120, 50) or Color3.fromRGB(70, 70, 70)
@@ -350,10 +444,9 @@ function loadMainGUI()
         ESPBtn.Text = "ESP: " .. (espActive and "ON" or "OFF")
         ESPBtn.BackgroundColor3 = espActive and Color3.fromRGB(50, 120, 50) or Color3.fromRGB(70, 70, 70)
         
-        for _, highlight in pairs(espHandles) do
-            if highlight then
-                highlight:Destroy()
-            end
+        for _, espData in pairs(espHandles) do
+            if espData.highlight then espData.highlight:Destroy() end
+            if espData.billboard then espData.billboard:Destroy() end
         end
         espHandles = {}
         
@@ -363,45 +456,41 @@ function loadMainGUI()
         end
         
         if espActive then
-            local function createHighlight(targetPlayer)
-                if targetPlayer.Character then
-                    local highlight = Instance.new("Highlight")
-                    highlight.Adornee = targetPlayer.Character
-                    highlight.FillTransparency = 1
-                    highlight.OutlineColor = Color3.new(1, 1, 1)
-                    highlight.Parent = targetPlayer.Character
-                    espHandles[targetPlayer] = highlight
-                end
-            end
-            
-            local function onPlayerAdded(targetPlayer)
+            local function setupESP(targetPlayer)
                 if targetPlayer ~= player then
-                    createHighlight(targetPlayer)
+                    local espData = createESP(targetPlayer)
+                    if espData then
+                        espHandles[targetPlayer] = espData
+                    end
                     
                     targetPlayer.CharacterAdded:Connect(function(character)
                         if espActive then
-                            createHighlight(targetPlayer)
+                            task.wait(1)
+                            local espData = createESP(targetPlayer)
+                            if espData then
+                                espHandles[targetPlayer] = espData
+                            end
                         end
                     end)
                 end
             end
             
             for _, targetPlayer in ipairs(Players:GetPlayers()) do
-                if targetPlayer ~= player then
-                    onPlayerAdded(targetPlayer)
-                end
+                setupESP(targetPlayer)
             end
             
-            Players.PlayerAdded:Connect(onPlayerAdded)
+            Players.PlayerAdded:Connect(setupESP)
             
             espConnection = RunService.Heartbeat:Connect(function()
                 if not espActive then return end
                 
-                for targetPlayer, highlight in pairs(espHandles) do
-                    if targetPlayer and highlight then
-                        if targetPlayer.Character and highlight.Parent ~= targetPlayer.Character then
-                            highlight.Adornee = targetPlayer.Character
-                            highlight.Parent = targetPlayer.Character
+                for targetPlayer, espData in pairs(espHandles) do
+                    if targetPlayer and targetPlayer.Character then
+                        if espData.highlight then
+                            espData.highlight.Adornee = targetPlayer.Character
+                        end
+                        if espData.billboard and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                            espData.billboard.Adornee = targetPlayer.Character.HumanoidRootPart
                         end
                     end
                 end
@@ -410,6 +499,8 @@ function loadMainGUI()
     end
 
     local function toggleFly()
+        if autoStealActive then return end
+        
         flyActive = not flyActive
         FlyBtn.Text = "Fly: " .. (flyActive and "ON" or "OFF")
         FlyBtn.BackgroundColor3 = flyActive and Color3.fromRGB(50, 120, 50) or Color3.fromRGB(70, 70, 70)
@@ -502,6 +593,8 @@ function loadMainGUI()
     end
 
     local function setBase()
+        if autoStealActive then return end
+        
         local character = player.Character
         if not character then return end
         
@@ -516,12 +609,11 @@ function loadMainGUI()
     end
 
     local function floatToBase()
-        if floatActive or not savedBasePosition then 
-            if not savedBasePosition then
-                createNotification("Ошибка", "Базовая позиция не установлена", 3)
-            end
+        if not savedBasePosition then
+            createNotification("Ошибка", "Базовая позиция не установлена", 3)
             return 
         end
+        
         floatActive = true
         
         local character = player.Character
@@ -545,12 +637,15 @@ function loadMainGUI()
         local startTime = tick()
         local speed = 40
         local minDistanceToStop = 3
-        local targetHeight = savedBasePosition.Y + 10
+        local targetHeight = savedBasePosition.Y
         
-        local connection
-        connection = RunService.Heartbeat:Connect(function()
+        if floatConnection then
+            floatConnection:Disconnect()
+        end
+        
+        floatConnection = RunService.Heartbeat:Connect(function()
             if not floatActive or not humanoidRootPart or not humanoid then
-                connection:Disconnect()
+                floatConnection:Disconnect()
                 FloatBtn.Text = "Float to Base"
                 return
             end
@@ -564,15 +659,15 @@ function loadMainGUI()
             if distance < minDistanceToStop then
                 floatActive = false
                 humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-                connection:Disconnect()
+                floatConnection:Disconnect()
                 FloatBtn.Text = "Float to Base"
                 return
             end
             
-            if tick() - startTime > 30 then
+            if tick() - startTime > 15 then
                 floatActive = false
                 humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-                connection:disconnect()
+                floatConnection:Disconnect()
                 FloatBtn.Text = "Float to Base"
                 return
             end
@@ -582,6 +677,8 @@ function loadMainGUI()
     end
 
     local function toggleAutoSteal()
+        if autoStealCooldown then return end
+        
         if not savedBasePosition then
             createNotification("Ошибка", "Сначала сохраните позицию базы", 3)
             return
@@ -597,18 +694,33 @@ function loadMainGUI()
         end
         
         if autoStealActive then
+            autoStealCooldown = true
+            disableAllFunctions()
+            
             local character = player.Character
-            if not character then return end
+            if not character then 
+                autoStealActive = false
+                AutoStealBtn.Text = "Auto Steal: OFF"
+                AutoStealBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+                autoStealCooldown = false
+                return
+            end
             
             local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-            if not humanoidRootPart then return end
+            if not humanoidRootPart then 
+                autoStealActive = false
+                AutoStealBtn.Text = "Auto Steal: OFF"
+                AutoStealBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+                autoStealCooldown = false
+                return
+            end
             
             savedHeight = humanoidRootPart.Position.Y
             
             local targetPosition = humanoidRootPart.Position + Vector3.new(0, 200, 0)
             humanoidRootPart.CFrame = CFrame.new(targetPosition)
             
-            task.wait(2)
+            task.wait(1)
             
             local skyBase = Vector3.new(savedBasePosition.X, humanoidRootPart.Position.Y, savedBasePosition.Z)
             local originalBase = savedBasePosition
@@ -616,29 +728,37 @@ function loadMainGUI()
             
             floatToBase()
             
+            autoStealTimer = task.delay(15, function()
+                if autoStealActive then
+                    toggleAutoSteal()
+                end
+            end)
+            
             while floatActive do
                 task.wait()
             end
             
             local currentPos = humanoidRootPart.Position
-            local baseXZ = Vector3.new(originalBase.X, 0, originalBase.Z)
-            local currentXZ = Vector3.new(currentPos.X, 0, currentPos.Z)
-            
-            if (baseXZ - currentXZ).Magnitude < 5 then
-                humanoidRootPart.CFrame = CFrame.new(Vector3.new(currentPos.X, originalBase.Y, currentPos.Z))
-            else
-                local finalPosition = Vector3.new(currentPos.X, savedHeight, currentPos.Z)
-                humanoidRootPart.CFrame = CFrame.new(finalPosition)
-            end
+            local finalPosition = Vector3.new(currentPos.X, savedHeight, currentPos.Z)
+            humanoidRootPart.CFrame = CFrame.new(finalPosition)
             
             savedBasePosition = originalBase
             autoStealActive = false
             AutoStealBtn.Text = "Auto Steal: OFF"
             AutoStealBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+            autoStealCooldown = false
+        else
+            if autoStealTimer then
+                task.cancel(autoStealTimer)
+                autoStealTimer = nil
+            end
+            autoStealCooldown = false
         end
     end
 
     local function toggleBoostSpeed()
+        if autoStealActive then return end
+        
         boostSpeedActive = not boostSpeedActive
         BoostSpeedBtn.Text = "Boost Speed: " .. (boostSpeedActive and "ON" or "OFF")
         BoostSpeedBtn.BackgroundColor3 = boostSpeedActive and Color3.fromRGB(50, 120, 50) or Color3.fromRGB(70, 70, 70)
@@ -678,9 +798,6 @@ function loadMainGUI()
                 lookVector = Vector3.new(lookVector.X, 0, lookVector.Z).Unit
                 
                 hrp.Velocity = lookVector * speed
-                
-                local currentPosition = hrp.Position
-                hrp.Position = Vector3.new(currentPosition.X, currentPosition.Y, currentPosition.Z)
             end)
         else
             if player.Character then
@@ -715,10 +832,9 @@ function loadMainGUI()
         end
         
         if espActive then
-            for _, highlight in pairs(espHandles) do
-                if highlight then
-                    highlight:Destroy()
-                end
+            for _, espData in pairs(espHandles) do
+                if espData.highlight then espData.highlight:Destroy() end
+                if espData.billboard then espData.billboard:Destroy() end
             end
             espHandles = {}
             
@@ -740,6 +856,10 @@ function loadMainGUI()
         if floatActive then
             floatActive = false
             FloatBtn.Text = "Float to Base"
+            if floatConnection then
+                floatConnection:Disconnect()
+                floatConnection = nil
+            end
         end
         
         if autoStealActive then
@@ -750,6 +870,11 @@ function loadMainGUI()
             autoStealActive = false
             AutoStealBtn.Text = "Auto Steal: OFF"
             AutoStealBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+            if autoStealTimer then
+                task.cancel(autoStealTimer)
+                autoStealTimer = nil
+            end
+            autoStealCooldown = false
         end
         
         if boostSpeedActive then
